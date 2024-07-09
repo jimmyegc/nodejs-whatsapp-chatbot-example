@@ -10,60 +10,6 @@ const QRPortalWeb = require("@bot-whatsapp/portal");
 const BaileysProvider = require("@bot-whatsapp/provider/baileys");
 const MockAdapter = require("@bot-whatsapp/database/mock");
 
-const flowSecundario = addKeyword(["2", "siguiente"]).addAnswer([
-  "📄 Aquí tenemos el flujo secundario",
-]);
-
-const flowDocs = addKeyword([
-  "doc",
-  "documentacion",
-  "documentación",
-]).addAnswer(
-  [
-    "📄 Aquí encontras las documentación recuerda que puedes mejorarla",
-    "https://bot-whatsapp.netlify.app/",
-    "\n*2* Para siguiente paso.",
-  ],
-  null,
-  null,
-  [flowSecundario]
-);
-
-const flowTuto = addKeyword(["tutorial", "tuto"]).addAnswer(
-  [
-    "🙌 Aquí encontras un ejemplo rapido",
-    "https://bot-whatsapp.netlify.app/docs/example/",
-    "\n*2* Para siguiente paso.",
-  ],
-  null,
-  null,
-  [flowSecundario]
-);
-
-const flowGracias = addKeyword(["gracias", "grac"]).addAnswer(
-  [
-    "🚀 Puedes aportar tu granito de arena a este proyecto",
-    "[*opencollective*] https://opencollective.com/bot-whatsapp",
-    "[*buymeacoffee*] https://www.buymeacoffee.com/leifermendez",
-    "[*patreon*] https://www.patreon.com/leifermendez",
-    "\n*2* Para siguiente paso.",
-  ],
-  null,
-  null,
-  [flowSecundario]
-);
-
-const flowDiscord = addKeyword(["discord"]).addAnswer(
-  [
-    "🤪 Únete al discord",
-    "https://link.codigoencasa.com/DISCORD",
-    "\n*2* Para siguiente paso.",
-  ],
-  null,
-  null,
-  [flowSecundario]
-);
-
 const flowPrincipal = addKeyword(["hola", "ole", "alo"])
   .addAnswer("Hola!, ¿Cómo estas?")
   .addAnswer("Bienvenido a este curso!");
@@ -78,14 +24,40 @@ const flowWelcome = addKeyword(EVENTS.WELCOME).addAnswer(
       console.log(ctx.body);
       await ctxFn.flowDynamic("Escribiste casas");
     } else {
-      await ctxFn.flowDynamic("Otras cosas");
+      await ctxFn.flowDynamic("Otra cosa");
+    }
+  }
+);
+
+const menuFlow = addKeyword("Menu").addAnswer(
+  "Este es el menu elegir la opcion 1,2,3,4,5 o 0",
+  { capture: true },
+  async (ctx, { gotoFlow, fallBack, flowDynamic }) => {
+    if (!["1", "2", "3", "4", "5", "0"].includes(ctx.body)) {
+      return fallBack(
+        "Respuesta no válida, por favor selecciona una de las opciones"
+      );
+    }
+    switch (ctx.body) {
+      case "1":
+        return await flowDynamic("Está es la opción #1");
+      case "2":
+        return await flowDynamic("Está es la opción #2");
+      case "3":
+        return await flowDynamic("Está es la opción #3");
+      case "4":
+        return await flowDynamic("Está es la opción #4");
+      case "5":
+        return await flowDynamic("Está es la opción #5");
+      case "0":
+        return await flowDynamic("Saliendo...");
     }
   }
 );
 
 const main = async () => {
   const adapterDB = new MockAdapter();
-  const adapterFlow = createFlow([flowPrincipal, flowWelcome]);
+  const adapterFlow = createFlow([flowPrincipal, flowWelcome, menuFlow]);
   const adapterProvider = createProvider(BaileysProvider);
 
   createBot({
